@@ -1,37 +1,33 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { useFonts } from 'expo-font';
-import { Stack } from 'expo-router';
-import * as SplashScreen from 'expo-splash-screen';
-import { useEffect } from 'react';
-import 'react-native-reanimated';
-
-import { useColorScheme } from '@/hooks/useColorScheme';
-
-// Prevent the splash screen from auto-hiding before asset loading is complete.
-SplashScreen.preventAutoHideAsync();
+import { AuthProvider, useAuth } from "@/components/AuthContext";
+import { Stack, useNavigation } from "expo-router";
+import { useEffect, useState } from "react";
+import { NativeStackNavigationProp } from "react-native-screens/lib/typescript/native-stack/types";
 
 export default function RootLayout() {
-  const colorScheme = useColorScheme();
-  const [loaded] = useFonts({
-    SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
-  });
+  return (
+    <AuthProvider>
+      <Layout />
+    </AuthProvider>
+  );
+}
+
+function Layout() {
+  const { authState } = useAuth();
+  const navi = useNavigation<NativeStackNavigationProp<any>>();
+
+  console.log(authState);
 
   useEffect(() => {
-    if (loaded) {
-      SplashScreen.hideAsync();
-    }
-  }, [loaded]);
-
-  if (!loaded) {
-    return null;
-  }
-
+    if (authState?.authenticated === true) navi.navigate("(screen)");
+    else navi.navigate("login");
+  }, [authState]);
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="+not-found" />
-      </Stack>
-    </ThemeProvider>
+    <Stack screenOptions={{ headerShown: false }}>
+      {authState?.authenticated === true ? (
+        <Stack.Screen name="(screen)" />
+      ) : (
+        <Stack.Screen name="login" />
+      )}
+    </Stack>
   );
 }
