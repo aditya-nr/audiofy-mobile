@@ -33,7 +33,7 @@ const FormInput: React.FC<FormInputProps> = ({
 
   return (
     <View style={style}>
-      <Text style={styles.labelText}>{title}</Text>
+      {title && <Text style={styles.labelText}>{title}</Text>}
       <View style={[styles.inputContainer, focus && styles.orangeBorder]}>
         <TextInput
           style={styles.textInput}
