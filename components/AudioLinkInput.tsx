@@ -9,13 +9,29 @@ import {
 } from "react-native";
 import React, { useState } from "react";
 import { colors, size } from "@/constants";
-import * as DocumentPicker from "expo-document-picker";
+import DocumentPicker, {
+  DocumentPickerSuccessResult,
+} from "expo-document-picker";
 
-const AudioLinkInput = ({ title }: { title: string }) => {
-  const [mode, setMode] = useState(false);
-  const [externalUrl, setExternalUrl] = useState("");
-  const [audio, setAudio] =
-    useState<DocumentPicker.DocumentPickerSuccessResult>();
+type AudioLinkInputProps = {
+  title: string;
+  audio: DocumentPickerSuccessResult | undefined;
+  setAudio: (val: DocumentPickerSuccessResult) => any;
+  link: string;
+  setLink: (val: string) => any;
+  type: "LINK" | "FILE";
+  setType: (val: "LINK" | "FILE") => void;
+};
+
+const AudioLinkInput = ({
+  audio,
+  link,
+  setAudio,
+  setLink,
+  title,
+  setType,
+  type,
+}: AudioLinkInputProps) => {
   const handleAudioPick = async () => {
     try {
       let result = await DocumentPicker.getDocumentAsync({ type: "audio/*" });
@@ -33,21 +49,27 @@ const AudioLinkInput = ({ title }: { title: string }) => {
       <View style={styles.container}>
         <View style={styles.buttonContainer}>
           <TouchableOpacity
-            onPress={() => setMode(true)}
-            style={[styles.buttonStyle, mode && styles.activeButton]}
+            onPress={() => setType("FILE")}
+            style={[styles.buttonStyle, type === "FILE" && styles.activeButton]}
           >
             <Text
-              style={[styles.buttonTextStyle, mode && styles.activeTextStyle]}
+              style={[
+                styles.buttonTextStyle,
+                type === "FILE" && styles.activeTextStyle,
+              ]}
             >
               File
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
-            onPress={() => setMode(false)}
-            style={[styles.buttonStyle, !mode && styles.activeButton]}
+            onPress={() => setType("LINK")}
+            style={[styles.buttonStyle, type === "LINK" && styles.activeButton]}
           >
             <Text
-              style={[styles.buttonTextStyle, !mode && styles.activeTextStyle]}
+              style={[
+                styles.buttonTextStyle,
+                type === "LINK" && styles.activeTextStyle,
+              ]}
             >
               Link
             </Text>
@@ -55,7 +77,7 @@ const AudioLinkInput = ({ title }: { title: string }) => {
         </View>
 
         {/* Audio */}
-        {mode && (
+        {type === "FILE" && (
           <TouchableOpacity
             onPress={handleAudioPick}
             style={{
@@ -79,10 +101,10 @@ const AudioLinkInput = ({ title }: { title: string }) => {
           </TouchableOpacity>
         )}
 
-        {!mode && (
+        {type === "LINK" && (
           <TextInput
-            value={externalUrl}
-            onChangeText={(v) => setExternalUrl(v)}
+            value={link}
+            onChangeText={(v) => setLink(v)}
             placeholder="Paste the link here..."
             placeholderTextColor={colors.gray[600]}
             style={{

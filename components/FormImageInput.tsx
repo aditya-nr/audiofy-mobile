@@ -10,13 +10,18 @@ import {
 import React, { useState } from "react";
 import { colors, size } from "@/constants";
 import { Entypo } from "@expo/vector-icons";
-import * as DocumentPicker from "expo-document-picker";
+import {
+  DocumentPickerSuccessResult,
+  getDocumentAsync,
+} from "expo-document-picker";
 
 interface FormInputProps {
   title: string;
   height?: number;
   placeholder?: string;
   style?: ViewStyle;
+  value: DocumentPickerSuccessResult | undefined;
+  setValue: (value: DocumentPickerSuccessResult) => any;
 }
 
 const FormImageInput: React.FC<FormInputProps> = ({
@@ -24,14 +29,14 @@ const FormImageInput: React.FC<FormInputProps> = ({
   placeholder,
   style,
   height,
+  value,
+  setValue,
 }) => {
-  const [coverImage, setCoverImage] = useState("");
-
   const handleCoverImageUpload = async () => {
     try {
-      let result = await DocumentPicker.getDocumentAsync({ type: "image/*" });
+      let result = await getDocumentAsync({ type: "image/*" });
       if (result.canceled != true) {
-        setCoverImage(result.assets[0].uri);
+        setValue(result);
       }
     } catch (error) {
       console.log(error);
@@ -49,14 +54,17 @@ const FormImageInput: React.FC<FormInputProps> = ({
         <View
           style={[
             styles.innerContainer,
-            { backgroundColor: coverImage ? "#00000070" : "" },
+            { backgroundColor: value?.assets[0].uri ? "#00000070" : "" },
           ]}
         >
           <Entypo name="upload" size={24} color={colors.secondary[500]} />
           <Text style={{ color: "white" }}>{placeholder}</Text>
         </View>
-        {coverImage && (
-          <Image source={{ uri: coverImage }} style={styles.imageContainer} />
+        {value?.assets[0].uri && (
+          <Image
+            source={{ uri: value?.assets[0].uri }}
+            style={styles.imageContainer}
+          />
         )}
       </TouchableOpacity>
     </View>
